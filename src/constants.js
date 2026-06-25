@@ -1,5 +1,3 @@
-// constants.js - 상수 및 메타데이터
-
 export const BIT_SECONDS = 5 / 448;
 export const BIT_MS = 625 / 56;
 
@@ -11,6 +9,13 @@ export const BLOCK_NAMES = [
 ];
 
 export const WAV_FOLDERS = [
+  'Drums','Chord','FA Front','FA Back',
+  'WWDTM High','WWDTM Low','SF Roll','SF Tap',
+  'PM','Arp','Noise','DTMF',
+  'Bass','Spreader','Radiolab',''
+];
+
+export const TILE_FOLDERS = [
   'Drums','Chord','FA Front','FA Back',
   'WWDTM High','WWDTM Low','SF Roll','SF Tap',
   'PM','Arp','Noise','DTMF',

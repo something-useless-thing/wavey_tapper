@@ -1,6 +1,6 @@
 // main.js
 import './style.css';
-import { BLOCK_NAMES, BLOCK_COLORS, BIT_SECONDS } from './constants.js';
+import { BLOCK_NAMES, BLOCK_COLORS, BIT_SECONDS, TILE_FOLDERS } from './constants.js';
 import { loadSounds, buildAudioEvents, closeAudio } from './audio.js';
 import { spriteImages, buildSpriteEvents, activateBlock, deactivateBlock } from './sprites.js';
 
@@ -14,6 +14,7 @@ let globalBlockSize = 120;  // 전체 크기
 const freePositions = {};   // id → {x, y}
 let freeDragMode = false;
 let noStyleMode = false;
+let customMode = false; // 커스텀 모드
 let spriteDurationMult = 1.0;
 
 // 오디오 상태
@@ -61,6 +62,31 @@ function applyBlockSize(el, id) {
   el.style.width = px + 'px';
   el.style.height = px + 'px';
   el.style.aspectRatio = 'unset';
+}
+
+// ── 기본 타일 이미지 로드 ─────────────────────────
+// img/tile/{폴더}/tile_000.png ~ 형식
+function loadDefaultTileImages() {
+  for (let id = 0; id < 16; id++) {
+    const folder = TILE_FOLDERS[id];
+    if (!folder) continue;
+    const tileCount = window.Tiles?.[id]?.length ?? 0;
+    for (let t = 0; t < tileCount; t++) {
+      const key = `${id}_${t}`;
+      if (!spriteImages[key]) { // 커스텀 없을 때만
+        const num = String(t).padStart(3, '0');
+        spriteImages[key] = `/img/tile/${folder}/tile_${num}.png`;
+      }
+    }
+  }
+}
+
+// ── 커스텀 모드 토글 ──────────────────────────────
+function toggleCustomMode(on) {
+  customMode = on;
+  document.body.classList.toggle('custom-mode', on);
+  // 커스텀 OFF → 기본 타일 이미지 복원 (유저가 올린 게 없는 것만)
+  if (!on) loadDefaultTileImages();
 }
 
 // ── 그리드 생성 ──────────────────────────────────
