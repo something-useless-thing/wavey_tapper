@@ -17,7 +17,11 @@ let animFrame = null;
 const activeBlocks = new Array(16).fill(null);
 let activeTimers = [];
 let dragMode = false;
+let freeDragMode = false;
 let dragSrcIdx = null;
+
+// 자유 드래그 위치 저장
+const freePositions = {}; // id → {x, y}
 let noStyleMode = false; // 스타일 없애기 모드
 
 // ── 데이터 로드 ───────────────────────────────────
@@ -73,35 +77,139 @@ function buildGrid() {
   });
 }
 
-// ── 드래그 ───────────────────────────────────────
+// ── 자유 드래그 ──────────────────────────────────
+function enterFreeDrag() {
+  const stage = document.getElementById('free-stage');
+  const grid = document.getElementById('grid');
+  stage.innerHTML = '';
+  stage.classList.add('active');
+  grid.style.visibility = 'hidden';
+
+  // 그리드 블록들 위치 계산해서 free-stage에 복제
+  blockOrder.forEach(id => {
+    const gridEl = document.querySelector(`#grid .block[data-id="${id}"]`);
+    if (!gridEl) return;
+    const rect = gridEl.getBoundingClientRect();
+
+    const pos = freePositions[id] ?? { x: rect.left, y: rect.top };
+    freePositions[id] = pos;
+
+    const clone = gridEl.cloneNode(true);
+    clone.dataset.id = id;
+    clone.style.left = pos.x + 'px';
+    clone.style.top = pos.y + 'px';
+    clone.style.setProperty('--c', BLOCK_COLORS[id]);
+
+    // 마우스 드래그
+    let isDragging = false, ox = 0, oy = 0;
+    clone.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      isDragging = true;
+      ox = e.clientX - freePositions[id].x;
+      oy = e.clientY - freePositions[id].y;
+      clone.style.zIndex = 999;
+      e.preventDefault();
+    });
+
+    // 우클릭 → 음소거
+    clone.addEventListener('contextmenu', e => {
+      e.preventDefault();
+      mutedBlocks.has(id) ? mutedBlocks.delete(id) : mutedBlocks.add(id);
+      clone.classList.toggle('muted');
+      // 그리드 원본도 동기화
+      document.querySelector(`#grid .block[data-id="${id}"]`)?.classList.toggle('muted');
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!isDragging) return;
+      freePositions[id] = { x: e.clientX - ox, y: e.clientY - oy };
+      clone.style.left = freePositions[id].x + 'px';
+      clone.style.top = freePositions[id].y + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+      if (!isDragging) return;
+      isDragging = false;
+      clone.style.zIndex = '';
+    });
+
+    stage.appendChild(clone);
+  });
+}
+
+function exitFreeDrag() {
+  const stage = document.getElementById('free-stage');
+  stage.classList.remove('active');
+  stage.innerHTML = '';
+  document.getElementById('grid').style.visibility = '';
+}
+
+// free-stage 블록 활성화 (재생 중 스프라이트 표시)
+function activateFreeBlock(id, tileIdx) {
+  const el = document.querySelector(`#free-stage .block[data-id="${id}"]`);
+  if (!el || mutedBlocks.has(id)) return;
+  el.classList.add('active');
+  el.querySelector('.block-tile').textContent = `T${tileIdx}`;
+  const img = el.querySelector('.block-sprite');
+  const key = `${id}_${tileIdx}`;
+  if (spriteImages[key]) {
+    img.src = spriteImages[key];
+    img.style.display = 'block';
+    el.querySelector('.block-placeholder').style.display = 'none';
+  } else {
+    img.style.display = 'none';
+    el.querySelector('.block-placeholder').style.display = 'flex';
+    el.querySelector('.block-num').textContent = tileIdx;
+  }
+  const flash = el.querySelector('.block-flash');
+  if (flash) { flash.style.opacity = '0.12'; setTimeout(() => flash.style.opacity = '0', 80); }
+}
+
+function deactivateFreeBlock(id) {
+  const el = document.querySelector(`#free-stage .block[data-id="${id}"]`);
+  if (!el) return;
+  el.classList.remove('active');
+  el.querySelector('.block-tile').textContent = '';
+  el.querySelector('.block-num').textContent = id;
+  el.querySelector('.block-placeholder').style.display = 'flex';
+  el.querySelector('.block-sprite').style.display = 'none';
+}
+
+// ── 드래그 (스왑) ────────────────────────────────
 function setupDrag() {
   const grid = document.getElementById('grid');
 
   grid.addEventListener('dragstart', e => {
+    if (!dragMode) return;
     const block = e.target.closest('.block');
-    if (!block || !dragMode) return;
+    if (!block) return;
     dragSrcIdx = blockOrder.indexOf(parseInt(block.dataset.id));
-    block.classList.add('dragging');
+    setTimeout(() => block.classList.add('dragging'), 0);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', block.dataset.id);
   });
 
-  grid.addEventListener('dragend', () => {
-    document.querySelectorAll('.block').forEach(el => el.classList.remove('dragging'));
+  grid.addEventListener('dragend', e => {
+    document.querySelectorAll('.block').forEach(el => el.classList.remove('dragging', 'drag-over'));
+    dragSrcIdx = null;
   });
 
   grid.addEventListener('dragover', e => {
     if (!dragMode) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    const block = e.target.closest('.block');
+    document.querySelectorAll('.block').forEach(el => el.classList.remove('drag-over'));
+    if (block) block.classList.add('drag-over');
   });
 
   grid.addEventListener('drop', e => {
     if (!dragMode) return;
     e.preventDefault();
+    document.querySelectorAll('.block').forEach(el => el.classList.remove('drag-over'));
     const block = e.target.closest('.block');
     if (!block || dragSrcIdx === null) return;
     const dstIdx = blockOrder.indexOf(parseInt(block.dataset.id));
-    if (dstIdx === dragSrcIdx) { dragSrcIdx = null; return; }
+    if (dstIdx === dragSrcIdx) return;
     [blockOrder[dragSrcIdx], blockOrder[dstIdx]] = [blockOrder[dstIdx], blockOrder[dragSrcIdx]];
     dragSrcIdx = null;
     buildGrid();
@@ -278,10 +386,12 @@ function loop() {
   while (_spritePtr < _spriteEvents.length && _spriteEvents[_spritePtr].timeMs <= elapsedMs) {
     const ev = _spriteEvents[_spritePtr++];
     activateBlock(ev.id, ev.tileIdx, mutedBlocks);
+    if (freeDragMode) activateFreeBlock(ev.id, ev.tileIdx);
     activeBlocks[ev.id] = ev;
     const t = setTimeout(() => {
       if (activeBlocks[ev.id] === ev) {
         deactivateBlock(ev.id);
+        if (freeDragMode) deactivateFreeBlock(ev.id);
         activeBlocks[ev.id] = null;
       }
     }, ev.endMs - elapsedMs);
@@ -300,16 +410,20 @@ function bindEvents() {
     else playSong();
   });
   document.getElementById('btn-stop').addEventListener('click', stopSong);
-  document.getElementById('btn-reset').addEventListener('click', stopSong);
 
   // 설정 패널
-  document.getElementById('settings-btn').addEventListener('click', e => {
+  const settingsBtn = document.getElementById('settings-btn');
+  const settingsPanel = document.getElementById('settings-panel');
+  settingsBtn.addEventListener('click', e => {
     e.stopPropagation();
-    document.getElementById('settings-panel').classList.toggle('open');
+    const rect = settingsBtn.getBoundingClientRect();
+    settingsPanel.style.top = (rect.bottom + 8) + 'px';
+    settingsPanel.style.left = rect.left + 'px';
+    settingsPanel.classList.toggle('open');
   });
   document.addEventListener('click', e => {
     if (!e.target.closest('#settings-panel') && !e.target.closest('#settings-btn'))
-      document.getElementById('settings-panel').classList.remove('open');
+      settingsPanel.classList.remove('open');
   });
 
   // 배경색
@@ -331,7 +445,17 @@ function bindEvents() {
     document.getElementById('bg-image-input').value = '';
   });
 
-  // 드래그 모드
+  // 자유 드래그 모드
+  document.getElementById('free-drag-toggle').addEventListener('click', () => {
+    freeDragMode = !freeDragMode;
+    const btn = document.getElementById('free-drag-toggle');
+    btn.textContent = freeDragMode ? '자유 드래그 ON' : '자유 드래그 OFF';
+    btn.classList.toggle('active', freeDragMode);
+    if (freeDragMode) enterFreeDrag();
+    else exitFreeDrag();
+  });
+
+  // 스왑 드래그 모드
   document.getElementById('drag-toggle').addEventListener('click', () => {
     dragMode = !dragMode;
     const btn = document.getElementById('drag-toggle');

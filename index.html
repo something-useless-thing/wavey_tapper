@@ -8,17 +8,20 @@
 </head>
 <body>
   <h1>Wavetapper</h1>
+
+  <!-- 자유 드래그 모드일 때 블록들이 여기 들어감 -->
+  <div id="free-stage"></div>
+
   <div id="grid"></div>
   <div id="timeline"><div id="tl-bar"></div></div>
   <div id="status">LOADING...</div>
 
   <div id="controls">
-    <button class="ctrl-btn danger" id="btn-reset">↺ Reset</button>
     <button class="ctrl-btn primary" id="btn-play">▶ Play</button>
     <button class="ctrl-btn" id="btn-stop" disabled>■ Stop</button>
+    <button class="ctrl-btn" id="settings-btn">⚙ Settings</button>
   </div>
 
-  <button id="settings-btn" title="설정">⚙</button>
   <div id="settings-panel">
     <div class="setting-row">
       <div class="setting-label">Background Color</div>
@@ -31,8 +34,9 @@
       <button class="setting-toggle" id="bg-image-clear">배경 이미지 제거</button>
     </div>
     <div class="setting-row">
-      <div class="setting-label">Block Position</div>
-      <button class="setting-toggle" id="drag-toggle">드래그 모드 OFF</button>
+      <div class="setting-label">Block Layout</div>
+      <button class="setting-toggle" id="drag-toggle">스왑 드래그 OFF</button>
+      <button class="setting-toggle" id="free-drag-toggle">자유 드래그 OFF</button>
     </div>
     <div class="setting-row">
       <div class="setting-label">Style</div>

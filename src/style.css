@@ -96,21 +96,26 @@ h1 { color: #333; font-size: 11px; letter-spacing: 6px; text-transform: uppercas
 
 /* ── 설정 ── */
 #settings-btn {
-  position: fixed; top: 16px; right: 16px;
-  background: #111118; border: 1px solid #2a2a3a; color: #555;
-  width: 36px; height: 36px; border-radius: 50%;
-  cursor: pointer; font-size: 16px;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s; z-index: 10;
+  background: #111118;
+  border: 1px solid #2a2a3a;
+  color: #666;
+  padding: 8px 20px;
+  font-size: 10px;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.15s;
+  text-transform: uppercase;
 }
 #settings-btn:hover { border-color: #555; color: #ccc; }
 
 #settings-panel {
-  position: fixed; top: 60px; right: 16px;
+  position: absolute;
   background: #12121e; border: 1px solid #2a2a3a;
   border-radius: 8px; padding: 16px; width: 220px;
   display: none; flex-direction: column; gap: 12px;
-  z-index: 10; font-size: 10px; color: #555;
+  z-index: 200; font-size: 10px; color: #555;
 }
 #settings-panel.open { display: flex; }
 .setting-label { color: #444; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
@@ -178,3 +183,30 @@ h1 { color: #333; font-size: 11px; letter-spacing: 6px; text-transform: uppercas
 .block.no-style .block-mute-icon { display: none !important; }
 .block.no-style .block-sprite { width: 100% !important; height: 100% !important; }
 .block.no-style.active { border-color: transparent !important; box-shadow: none !important; }
+
+.block.drag-over {
+  border-color: var(--c) !important;
+  opacity: 0.7;
+}
+
+/* ── 컨트롤 래퍼 (설정패널 앵커) ── */
+#controls { position: relative; }
+
+/* ── 자유 드래그 스테이지 ── */
+#free-stage {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+#free-stage.active { display: block; pointer-events: all; }
+#free-stage .block {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  aspect-ratio: unset;
+  cursor: grab;
+  pointer-events: all;
+}
+#free-stage .block:active { cursor: grabbing; }
