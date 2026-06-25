@@ -14,7 +14,7 @@ let globalBlockSize = 120;  // 전체 크기
 const freePositions = {};   // id → {x, y}
 let freeDragMode = false;
 let noStyleMode = false;
-let tileLabelVisible = true;
+let tileLabelVisible = false;
 let customMode = false;
 let spriteDurationMult = 1.0;
 
@@ -302,12 +302,10 @@ function openSpriteModal(id) {
   const curSize = getBlockSize(id);
   const indivSlider = document.getElementById('block-individual-size');
   const indivVal = document.getElementById('block-individual-size-val');
-  const indivReset = document.getElementById('block-individual-size-reset');
   indivSlider.value = curSize;
   indivVal.textContent = curSize + 'px';
   // data-modal-id로 현재 대상 블록 id를 추적 (리스너는 최초 1회만 등록)
   indivSlider.dataset.modalId = id;
-  indivReset.dataset.modalId = id;
 
   const tileGrid = document.getElementById('sprite-tile-grid');
   tileGrid.innerHTML = '';
@@ -421,7 +419,12 @@ function loop() {
     activeTimers.push(t);
   }
 
-  if (elapsedMs >= _songDuration) { stopSong(); return; }
+  if (elapsedMs >= _songDuration) { 
+    // 곡 끝: 모든 블록을 첫 번째(default) 이미지로 복귀
+    for (let id = 0; id < 16; id++) deactivateBlock(id);
+    stopSong(); 
+    return; 
+  }
   animFrame = requestAnimationFrame(loop);
 }
 
@@ -437,6 +440,7 @@ function bindEvents() {
   document.getElementById('ui-toggle').addEventListener('click', () => {
     uiVisible = !uiVisible;
     document.getElementById('ui-wrapper').classList.toggle('hidden', !uiVisible);
+    document.getElementById('main-title').classList.toggle('hidden', !uiVisible);
   });
 
   // 설정 모달
@@ -562,6 +566,26 @@ function bindEvents() {
     document.documentElement.style.setProperty('--tile-label-display', tileLabelVisible ? 'block' : 'none');
   });
 
+  // 팁 표시 토글
+  let tipVisible = true;
+  document.getElementById('tip-toggle').addEventListener('click', () => {
+    tipVisible = !tipVisible;
+    const btn = document.getElementById('tip-toggle');
+    btn.textContent = tipVisible ? '팁 표시 ON' : '팁 표시 OFF';
+    btn.classList.toggle('active', tipVisible);
+    document.getElementById('tip-display').style.display = tipVisible ? '' : 'none';
+  });
+
+  // 타이틀 표시 토글
+  let titleVisible = true;
+  document.getElementById('title-toggle').addEventListener('click', () => {
+    titleVisible = !titleVisible;
+    const btn = document.getElementById('title-toggle');
+    btn.textContent = titleVisible ? '타이틀 표시 ON' : '타이틀 표시 OFF';
+    btn.classList.toggle('active', titleVisible);
+    document.getElementById('main-title').classList.toggle('hidden', !titleVisible);
+  });
+
   // 스프라이트 모달 닫기
   document.getElementById('sprite-modal-close').addEventListener('click', () => {
     document.getElementById('sprite-modal').classList.remove('open');
@@ -582,27 +606,20 @@ function bindEvents() {
       el.style.height = px + 'px';
     });
   });
-  document.getElementById('block-individual-size-reset').addEventListener('click', () => {
-    const id = parseInt(document.getElementById('block-individual-size').dataset.modalId);
-    delete blockSizes[id];
-    const px = globalBlockSize;
-    document.getElementById('block-individual-size').value = px;
-    document.getElementById('block-individual-size-val').textContent = px + 'px';
-    document.querySelectorAll(`.block[data-id="${id}"]`).forEach(el => {
-      el.style.width = px + 'px';
-      el.style.height = px + 'px';
-    });
-  });
 }
 
 // ── 팁 시스템 ─────────────────────────────────────
 const TIPS = [
-  '블록을 클릭하면 스프라이트를 설정할 수 있어요',
-  '블록을 우클릭하면 해당 블록을 음소거할 수 있어요',
-  '설정에서 블록 크기와 모양을 바꿀 수 있어요',
+  '블록을 클릭하면 스프라이트를 설정할 수 있습니다',
+  '블록을 우클릭하면 해당 블록을 음소거할 수 있어요!',
+  '설정에서 블록 크기와 모양을 바꿀 수 있습니다',
   '자유 드래그 모드에서 블록을 원하는 위치로 옮길 수 있어요',
-  '커스텀 모드에서 각 블록에 나만의 이미지를 넣을 수 있어요',
-  '팁 추가하고 싶으면 main.js의 TIPS 배열에 넣으세요!',
+  '스프라이트 표시 시간을 조절하면 블록이 바뀌는 속도를 바꿀 수 있습니다',
+  '오른쪽 구석에 있는 버튼을 눌러 UI를 숨길 수 있습니다',
+  '오른쪽 구석에 있는 버튼을 눌러 UI를 숨길 수 있습니다',
+  '오른쪽 구석에 있는 버튼을 눌러 UI를 숨길 수 있습니다',
+  '설정에서 타일 레이블을 꺼서 블록 번호와 이름을 숨길 수 있습니다',
+  '설정봐봐요 신기한 기능이 많답니다'
 ];
 let _tipIdx = 0;
 function startTips() {
@@ -624,9 +641,14 @@ async function init() {
   await loadGameData();
   buildGrid();
   bindEvents();
+  startTips();
   // 기본: 화이트모드 + 기본 이미지
   document.body.classList.add('light');
   document.getElementById('theme-toggle').textContent = '화이트 모드';
+  // 타일 레이블 초기값 설정
+  document.documentElement.style.setProperty('--tile-label-display', 'none');
+  document.getElementById('tile-label-toggle').textContent = '타일 레이블 OFF';
+  document.getElementById('tile-label-toggle').classList.remove('active');
   applyDefaultImages();
   toggleCustomMode(false); // 기본 이미지 블록에 표시
   await Promise.all(Array.from({length: 16}, async (_, i) => {

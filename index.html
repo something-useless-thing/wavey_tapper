@@ -19,9 +19,9 @@
 
   <!-- UI 래퍼: 팁, 타임라인, 상태, 컨트롤 -->
   <div id="ui-wrapper">
-    <div id="tip-display">💡 <span id="tip-text"></span></div>
+    <div id="tip-display"><span id="tip-text"></span></div>
     <div id="timeline"><div id="tl-bar"></div></div>
-    <div id="status">LOADING...</div>
+    <div id="status">로딩중...</div>
     <div id="controls">
       <button class="ctrl-btn primary" id="btn-play">▶ Play</button>
       <button class="ctrl-btn" id="btn-stop" disabled>■ Stop</button>
@@ -36,9 +36,11 @@
         <button id="settings-modal-close">×</button>
       </div>
       <div class="setting-row">
-        <div class="setting-label">Theme</div>
-        <button class="setting-toggle" id="theme-toggle">🌙 Dark Mode</button>
-        <button class="setting-toggle" id="custom-mode-toggle">✏ Custom Mode OFF</button>
+        <div class="setting-label">테마</div>
+        <div class="setting-row-btns">
+          <button class="setting-toggle" id="theme-toggle">Dark Mode</button>
+          <button class="setting-toggle" id="custom-mode-toggle">Custom Mode OFF</button>
+        </div>
       </div>
       <div class="setting-row">
         <div class="setting-label">Background Color</div>
@@ -46,9 +48,11 @@
       </div>
       <div class="setting-row">
         <div class="setting-label">Background Image</div>
-        <label class="setting-file-label" for="bg-image-input">+ 이미지 업로드</label>
-        <input type="file" id="bg-image-input" accept="image/*" style="display:none">
-        <button class="setting-toggle" id="bg-image-clear">배경 이미지 제거</button>
+        <div class="setting-row-btns">
+          <label class="setting-file-label" for="bg-image-input">+ 이미지 업로드</label>
+          <input type="file" id="bg-image-input" accept="image/*" style="display:none">
+          <button class="setting-toggle" id="bg-image-clear">배경 이미지 제거</button>
+        </div>
       </div>
       <div class="setting-row">
         <div class="setting-label">Grid 세로 위치  <span id="grid-offset-val">0px</span></div>
@@ -68,13 +72,24 @@
       </div>
       <div class="setting-row">
         <div class="setting-label">Block Layout</div>
-        <button class="setting-toggle" id="free-drag-toggle">자유 드래그 OFF</button>
-        <button class="setting-toggle" id="free-pos-reset">위치 초기화</button>
+        <div class="setting-row-btns">
+          <button class="setting-toggle" id="free-drag-toggle">자유 드래그 OFF</button>
+          <button class="setting-toggle" id="free-pos-reset">위치 초기화</button>
+        </div>
       </div>
       <div class="setting-row">
         <div class="setting-label">Style</div>
-        <button class="setting-toggle" id="no-style-toggle">스타일 없애기 OFF</button>
-        <button class="setting-toggle" id="tile-label-toggle">타일 레이블 ON</button>
+        <div class="setting-row-btns">
+          <button class="setting-toggle" id="no-style-toggle">스타일 없애기 OFF</button>
+          <button class="setting-toggle" id="tile-label-toggle">타일 레이블 ON</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">UI</div>
+        <div class="setting-row-btns">
+          <button class="setting-toggle" id="tip-toggle">팁 표시 ON</button>
+          <button class="setting-toggle" id="title-toggle">타이틀 표시 ON</button>
+        </div>
       </div>
     </div>
   </div>
@@ -87,10 +102,7 @@
       </div>
       <div class="setting-row">
         <div class="setting-label">블럭 크기  <span id="block-individual-size-val">120px</span></div>
-        <div style="display:flex; gap:6px; align-items:center;">
-          <input type="range" id="block-individual-size" min="40" max="400" value="120" step="4" style="flex:1">
-          <button class="setting-toggle" id="block-individual-size-reset" style="white-space:nowrap; padding:4px 8px;">초기화</button>
-        </div>
+        <input type="range" id="block-individual-size" min="40" max="400" value="120" step="4">
       </div>
       <div id="sprite-tile-grid"></div>
     </div>

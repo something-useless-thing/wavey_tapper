@@ -1,6 +1,6 @@
 // sprites.js - 스프라이트 이벤트 빌드 및 블록 UI
 
-import { BIT_MS, BLOCK_COLORS, TILE_FOLDERS, TILE_OFFSETS } from './constants.js';
+import { BIT_MS, BLOCK_COLORS, TILE_FOLDERS, TILE_OFFSETS, TEXT_TILE_FILES } from './constants.js';
 
 // 전역 스프라이트 이미지 저장소
 export const spriteImages = {}; // "id_tileIdx" → url, "id_default" → url
@@ -46,6 +46,12 @@ function ensureSvgFilter(id, color) {
 export function getTilePath(id, tileIdx) {
   const folder = TILE_FOLDERS[id];
   if (!folder) return null;
+  // Text 블록(15번)은 파일명이 연속되지 않아 별도 매핑 사용
+  if (id === 15) {
+    const fileNum = TEXT_TILE_FILES[tileIdx];
+    if (fileNum === undefined) return null;
+    return `/img/tile/${folder}/tile_${fileNum}.png`;
+  }
   const num = String(TILE_OFFSETS[id] + tileIdx).padStart(3, '0');
   return `/img/tile/${folder}/tile_${num}.png`;
 }
