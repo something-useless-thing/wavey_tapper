@@ -15,6 +15,7 @@ let isPlaying = false;
 let isPaused = false;
 let animFrame = null;
 const activeBlocks = new Array(16).fill(null);
+const activeBlockTimers = new Array(16).fill(null); // 블럭별 deactivate 타이머
 let activeTimers = [];
 let dragMode = false;
 let freeDragMode = false;
@@ -431,6 +432,7 @@ function stopSong() {
   if (animFrame) cancelAnimationFrame(animFrame);
   activeTimers.forEach(clearTimeout);
   activeTimers = [];
+  activeBlockTimers.fill(null);
   for (let id = 0; id < 16; id++) deactivateBlock(id);
   document.getElementById('tl-bar').style.width = '0%';
   document.getElementById('status').textContent = 'READY';
@@ -463,17 +465,23 @@ function loop() {
 
   while (_spritePtr < _spriteEvents.length && _spriteEvents[_spritePtr].timeMs <= elapsedMs) {
     const ev = _spriteEvents[_spritePtr++];
+    // 같은 블럭 이전 타이머 취소
+    if (activeBlockTimers[ev.id] !== null) {
+      clearTimeout(activeBlockTimers[ev.id]);
+      activeBlockTimers[ev.id] = null;
+    }
     activateBlock(ev.id, ev.tileIdx, mutedBlocks);
     if (freeDragMode) activateFreeBlock(ev.id, ev.tileIdx);
     activeBlocks[ev.id] = ev;
     const displayDur = (ev.endMs - ev.timeMs) * spriteDurationMult;
+    const remaining = displayDur - (elapsedMs - ev.timeMs);
     const t = setTimeout(() => {
-      if (activeBlocks[ev.id] === ev) {
-        deactivateBlock(ev.id);
-        if (freeDragMode) deactivateFreeBlock(ev.id);
-        activeBlocks[ev.id] = null;
-      }
-    }, displayDur - (elapsedMs - ev.timeMs));
+      activeBlockTimers[ev.id] = null;
+      activeBlocks[ev.id] = null;
+      deactivateBlock(ev.id);
+      if (freeDragMode) deactivateFreeBlock(ev.id);
+    }, Math.max(remaining, 0));
+    activeBlockTimers[ev.id] = t;
     activeTimers.push(t);
   }
 
@@ -546,6 +554,8 @@ function bindEvents() {
     const btn = document.getElementById('free-drag-toggle');
     btn.textContent = freeDragMode ? '자유 드래그 ON' : '자유 드래그 OFF';
     btn.classList.toggle('active', freeDragMode);
+    btn.disabled = true;
+    setTimeout(() => { btn.disabled = false; }, 300);
     if (freeDragMode) enterFreeDrag();
     else exitFreeDrag();
     document.getElementById('settings-btn').classList.toggle('above-stage', freeDragMode);
