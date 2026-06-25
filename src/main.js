@@ -415,6 +415,13 @@ function bindEvents() {
     document.getElementById('sprite-dur-val').textContent = spriteDurationMult.toFixed(1) + '×';
   });
 
+  // 테마 토글
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    const isLight = document.body.classList.toggle('light');
+    const btn = document.getElementById('theme-toggle');
+    btn.textContent = isLight ? '☀ Light Mode' : '🌙 Dark Mode';
+  });
+
   // 배경색
   document.getElementById('bg-color').addEventListener('input', e => {
     document.body.style.background = e.target.value;
