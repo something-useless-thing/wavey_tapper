@@ -188,31 +188,41 @@ function setGlobalBlockSize(px) {
 function enterFreeDrag() {
   const grid = document.getElementById('grid');
 
-  // 위치 먼저 읽기 (레이아웃 변경 전)
+  // body에 있는 블록들 grid로 먼저 복귀 (이전 자유드래그 잔재 정리)
+  document.querySelectorAll('body > .block').forEach(el => {
+    grid.appendChild(el);
+    el.style.position = '';
+    el.style.left = '';
+    el.style.top = '';
+    el.style.zIndex = '';
+    el.style.cursor = '';
+    el._freeDragBound = false;
+  });
+  grid.style.visibility = '';
+
+  // 위치를 항상 새로 읽기 (zoom 보정 포함)
+  const zoom = parseFloat(getComputedStyle(document.body).zoom) || 1;
   document.querySelectorAll('#grid .block').forEach(el => {
     const id = parseInt(el.dataset.id);
-    if (!freePositions[id]) {
-      const rect = el.getBoundingClientRect();
-      freePositions[id] = { x: rect.left, y: rect.top };
-    }
+    const rect = el.getBoundingClientRect();
+    freePositions[id] = { x: rect.left / zoom, y: rect.top / zoom };
   });
 
-  // 그리드 높이 고정 후 숨기기
+  // 그리드 높이 고정 후 숨기기 (zoom 보정)
   const gridRect = grid.getBoundingClientRect();
-  grid.style.minHeight = gridRect.height + 'px';
+  grid.style.minHeight = (gridRect.height / zoom) + 'px';
+  grid.style.minWidth = (gridRect.width / zoom) + 'px';
   grid.style.visibility = 'hidden';
 
   // 블록을 body로 이동 → fixed 자유 배치
   blockOrder.forEach(id => {
     const el = document.querySelector(`#grid .block[data-id="${id}"]`);
     if (!el) return;
-    const size = getBlockSize(id);
 
     el.style.position = 'fixed';
     el.style.left = freePositions[id].x + 'px';
     el.style.top = freePositions[id].y + 'px';
-    el.style.width = size + 'px';
-    el.style.height = size + 'px';
+    // 크기는 건드리지 않음
     el.style.zIndex = '50';
     el.style.cursor = 'grab';
     document.body.appendChild(el);
@@ -612,6 +622,7 @@ function bindEvents() {
     const px = parseInt(e.target.value);
     document.getElementById('grid-offset-val').textContent = px + 'px';
     document.getElementById('grid').style.marginTop = px + 'px';
+    document.getElementById('main-title').style.marginTop = px + 'px';
   });
 
   // 전체 블록 크기
@@ -771,7 +782,10 @@ const TIPS = [
   '오른쪽 구석에 있는 버튼을 눌러 UI를 숨길 수 있습니다',
   '오른쪽 구석에 있는 버튼을 눌러 UI를 숨길 수 있습니다',
   '설정에서 타일 레이블을 꺼서 블록 번호와 이름을 숨길 수 있습니다',
-  '설정봐봐요 신기한 기능이 많답니다'
+  '설정봐봐요 신기한 기능이 많답니다',
+  '블럭이 너무 발작하는 것 같다면 스프라이트 표시 시간을 늘려보세요!',
+  '스프라이트 교체 모드에서는 두 개의 스프라이트를 선택해 서로 바꿀 수 있습니다',
+  ''
 ];
 let _tipIdx = 0;
 function startTips() {
@@ -810,6 +824,9 @@ async function init() {
   document.getElementById('tile-label-toggle').classList.remove('active');
   applyDefaultImages();
   toggleCustomMode(false);
+  // 그리드 세로 위치 기본 30px
+  document.getElementById('grid').style.marginTop = '15px';
+  document.getElementById('main-title').style.marginTop = '15px';
 
   await Promise.all(Array.from({length: 16}, async (_, i) => {
     try {
