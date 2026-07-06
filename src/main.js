@@ -577,7 +577,8 @@ function bindEvents() {
   document.getElementById('ui-toggle').addEventListener('click', () => {
     uiVisible = !uiVisible;
     document.getElementById('ui-wrapper').classList.toggle('hidden', !uiVisible);
-    document.getElementById('main-title')?.classList.toggle('hidden', !uiVisible);
+    const title = document.getElementById('main-title');
+    if (title) title.style.visibility = uiVisible ? '' : 'hidden';
   });
 
   // 설정 모달
