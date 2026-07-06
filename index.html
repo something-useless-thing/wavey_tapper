@@ -98,6 +98,18 @@
         <input type="range" id="sprite-dur" min="1" max="20" value="1" step="0.5">
       </div>
       <div class="setting-row">
+        <div class="setting-label show-label">바운스 효과</div>
+        <div class="setting-row-btns">
+          <button class="setting-toggle" id="bounce-toggle">바운스 OFF</button>
+        </div>
+      </div>
+      <div class="setting-row" id="bounce-settings" style="display:none">
+        <div class="setting-label show-label">바운스 높이  <span id="bounce-px-val">6px</span></div>
+        <input type="range" id="bounce-px" min="1" max="20" value="6" step="1">
+        <div class="setting-label show-label">바운스 시간  <span id="bounce-dur-val">0.4s</span></div>
+        <input type="range" id="bounce-dur" min="0.1" max="2" value="0.4" step="0.1">
+      </div>
+      <div class="setting-row">
         <div class="setting-label show-label">블럭 레이아웃</div>
         <div class="setting-row-btns">
           <button class="setting-toggle" id="free-drag-toggle">자유 드래그 OFF</button>

@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: '맑은 고딕', 'Malgun Gothic', sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: '맑�? 고딕', 'Malgun Gothic', sans-serif; }
 
 body {
   background: #0a0a0f;
@@ -9,7 +9,7 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  font-family: '맑은 고딕', 'Malgun Gothic', sans-serif;
+  font-family: '맑�? 고딕', 'Malgun Gothic', sans-serif;
   font-size: 14px;
   zoom: 0.9;
   transition: background 0.3s;
@@ -17,7 +17,7 @@ body {
 
 h1 { color: #333; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; font-weight: 300; padding-bottom: 16px; }
 
-/* ── UI 래퍼 ── */
+/* ?�?� UI ?�퍼 ?�?� */
 #ui-wrapper {
   display: flex;
   flex-direction: column;
@@ -30,7 +30,7 @@ h1 { color: #333; font-size: 11px; letter-spacing: 4px; text-transform: uppercas
 #ui-wrapper.hidden #controls { pointer-events: all; }
 #main-title.hidden { display: none; }
 
-/* ── UI 토글 / 설정 fixed 버튼 ── */
+/* ?�?� UI ?��? / ?�정 fixed 버튼 ?�?� */
 #ui-toggle {
   position: fixed; bottom: 16px; right: 16px;
   background: #111118; border: 1px solid #2a2a3a; color: #444;
@@ -42,7 +42,7 @@ h1 { color: #333; font-size: 11px; letter-spacing: 4px; text-transform: uppercas
 #ui-toggle:hover { border-color: #666; color: #aaa; }
 #settings-btn.above-stage { position: relative; z-index: 9999; }
 
-/* ── 그리드 ── */
+/* ?�?� 그리???�?� */
 #grid {
   display: grid;
   gap: 8px;
@@ -78,7 +78,7 @@ h1 { color: #333; font-size: 11px; letter-spacing: 4px; text-transform: uppercas
 .block.muted .block-mute-icon { display: block; color: #ff4a45; }
 .block-flash { position: absolute; inset: 0; background: var(--c); opacity: 0; pointer-events: none; transition: opacity 0.05s; }
 
-/* ── 스타일 없애기 ── */
+/* ?�?� ?��????�애�??�?� */
 .block.no-style {
   background: transparent !important; border-color: transparent !important;
   box-shadow: none !important; border-radius: 0 !important;
@@ -95,13 +95,13 @@ body.custom-active .block { cursor: pointer; }
 #tip-text { transition: opacity 0.4s; }
 body.light #tip-display { color: #b1b1b1; }
 
-/* ── 타임라인 ── */
+/* ?�?� ?�?�라???�?� */
 #timeline { width: min(90vw, 640px); height: 6px; background: #1a1a2a; border-radius: 3px; overflow: hidden; }
 #tl-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #3b46ff, #8951fb, #ff57d6); transition: width 0.1s linear; }
 
 #status { font-size: 10px; color: #555; letter-spacing: 3px; font-weight: 500; }
 
-/* ── 컨트롤 ── */
+/* ?�?� 컨트�??�?� */
 #controls { display: flex; gap: 8px; }
 .ctrl-btn {
   background: #111118; border: 1px solid #2a2a3a; color: #666;
@@ -114,7 +114,7 @@ body.light #tip-display { color: #b1b1b1; }
 .ctrl-btn.primary:hover { background: #3b46ff22; }
 .ctrl-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-/* ── 설정 모달 ── */
+/* ?�?� ?�정 모달 ?�?� */
 #settings-modal {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.75); z-index: 300;
@@ -157,7 +157,7 @@ body.light #tip-display { color: #b1b1b1; }
 .setting-toggle:hover { border-color: #555; color: #ccc; }
 .setting-toggle.active { border-color: #8951fb; color: #8951fb; }
 
-/* ── 스프라이트 편집 모달 ── */
+/* ?�?� ?�프?�이???�집 모달 ?�?� */
 #sprite-modal {
   display: none; position: fixed; inset: 0;
   background: rgba(0,0,0,0.8); z-index: 400;
@@ -193,7 +193,7 @@ body.light #tip-display { color: #b1b1b1; }
 .sprite-tile-item .tile-num { font-size: 18px; font-weight: bold; color: #333; }
 .sprite-tile-item .tile-sub { font-size: 8px; color: #2a2a3a; letter-spacing: 1px; }
 
-/* ── 자유 드래그 스테이지 ── */
+/* ?�?� ?�유 ?�래�??�테?��? ?�?� */
 #free-stage {
   display: none; position: fixed; inset: 0; z-index: 50; pointer-events: none;
 }
@@ -204,7 +204,7 @@ body.light #tip-display { color: #b1b1b1; }
 }
 #free-stage .block:active { cursor: grabbing; }
 
-/* 기본 이미지 칸 - 전체 너비로 눈에 띄게 */
+/* 기본 ?��?지 �?- ?�체 ?�비�??�에 ?�게 */
 .sprite-tile-default {
   grid-column: 1 / -1;
   aspect-ratio: unset;
@@ -224,7 +224,7 @@ body.light #tip-display { color: #b1b1b1; }
 }
 #block-size-val { color: #8951fb; margin-left: 6px; }
 
-/* ── 라이트 모드 ── */
+/* ?�?� ?�이??모드 ?�?� */
 body.light {
   background: #f0f0f5;
   color: #111;
@@ -268,7 +268,7 @@ body.light .sprite-tile-item {
 body.light .sprite-tile-item .tile-num { color: #bbb; }
 body.light .sprite-tile-item .tile-sub { color: #ccc; }
 
-/* ── 로딩 화면 ── */
+/* ?�?� 로딩 ?�면 ?�?� */
 #loading-screen {
   position: fixed; inset: 0; z-index: 99999;
   background: #0a0a0f;
@@ -295,7 +295,7 @@ body.light .sprite-tile-item .tile-sub { color: #ccc; }
 #loading-desc {
   display: flex; flex-direction: column; align-items: center; gap: 8px;
   font-size: 15px; color: #888; line-height: 1.8;
-  font-family: '맑은 고딕', 'Malgun Gothic', sans-serif; text-align: center;
+  font-family: '맑�? 고딕', 'Malgun Gothic', sans-serif; text-align: center;
 }
 
 #loading-bar-wrap {
@@ -308,7 +308,7 @@ body.light .sprite-tile-item .tile-sub { color: #ccc; }
   transition: width 0.3s ease;
 }
 
-/* ── ui-toggle 이미지 ── */
+/* ?�?� ui-toggle ?��?지 ?�?� */
 #ui-toggle {
   padding: 0; overflow: hidden;
   background: none; border: none;
@@ -320,14 +320,14 @@ body.light .sprite-tile-item .tile-sub { color: #ccc; }
 }
 #ui-toggle:hover img { opacity: 1; }
 
-/* ── 팝업 x버튼 크게 ── */
+/* ?�?� ?�업 x버튼 ?�게 ?�?� */
 #sprite-modal-close {
   font-size: 26px !important;
   width: 36px; height: 36px;
   display: flex; align-items: center; justify-content: center;
 }
 
-/* ── 로딩 by 텍스트 ── */
+/* ?�?� 로딩 by ?�스???�?� */
 #loading-by {
   font-size: 11px; color: #444;
   letter-spacing: 3px; font-family: 'Courier New', monospace;
@@ -341,7 +341,7 @@ body.light .sprite-tile-item .tile-sub { color: #ccc; }
   100% { opacity: 0; }
 }
 
-/* ── 설정 카테고리 헤더 ── */
+/* ?�?� ?�정 카테고리 ?�더 ?�?� */
 .setting-category {
   font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
   color: #8951fb; border-bottom: 1px solid #2a2a3a;
@@ -351,7 +351,7 @@ body.light .setting-category { color: #8951fb; border-color: #dddde8; }
 
 #settings-modal-inner { width: 380px !important; }
 
-/* ── 팝업 상단 버튼 ── */
+/* ?�?� ?�업 ?�단 버튼 ?�?� */
 .sprite-modal-btn {
   background: #1a1a26; border: 1px solid #2a2a3a; color: #666;
   padding: 4px 10px; font-size: 9px; font-family: 'Courier New', monospace;
@@ -360,21 +360,21 @@ body.light .setting-category { color: #8951fb; border-color: #dddde8; }
 .sprite-modal-btn:hover { border-color: #555; color: #ccc; }
 .sprite-modal-btn.active { border-color: #8951fb; color: #8951fb; }
 
-/* 교체모드일 때 타일에 선택 표시 */
+/* 교체모드?????�?�에 ?�택 ?�시 */
 .sprite-tile-item.swap-selected {
   border-color: #ff57d6 !important;
   border-style: solid !important;
   box-shadow: 0 0 8px -2px #ff57d6;
 }
 
-/* 설정 레이블 숨기기 */
+/* ?�정 ?�이�??�기�?*/
 #settings-modal-inner .setting-label { display: none; }
 #settings-modal-inner .setting-label.show-label { display: block; }
 
 #loading-screen { cursor: pointer; }
 #loading-skip {
   font-size: 11px; color: #333;
-  font-family: '맑은 고딕', 'Malgun Gothic', sans-serif;
+  font-family: '맑�? 고딕', 'Malgun Gothic', sans-serif;
   animation: loading-fade-in 1s ease 2s both;
 }
 
@@ -386,3 +386,13 @@ body.light .setting-category { color: #8951fb; border-color: #dddde8; }
   margin-bottom: 8px;
 }
 #loading-link:hover { text-decoration: underline; opacity: 0.8; }
+
+/* ?�?� 블록 바운???�니메이???�?� */
+@keyframes block-bounce {
+  0%   { transform: translateY(0); }
+  0.25%  { transform: translateY(var(--bounce-px, -6px));; }
+  100% { transform: translateY(0); }
+}
+.block.bouncing {
+  animation: block-bounce var(--bounce-dur, 0.4s) ease-out;
+}

@@ -17,7 +17,8 @@ let noStyleMode = false;
 let tileLabelVisible = false;
 let customMode = false;
 let spriteDurationMult = 1.0;
-let bgPlayEnabled = true; // 백그라운드 재생
+let bgPlayEnabled = true;
+let bounceEnabled = false; // 백그라운드 재생
 
 // 팝업 스왑 모드
 let swapMode = false;
@@ -532,6 +533,16 @@ function loop() {
       activeBlockTimers[ev.id] = null;
     }
     activateBlock(ev.id, ev.tileIdx, mutedBlocks);
+    // 바운스 효과
+    if (bounceEnabled) {
+      const el = document.querySelector(`.block[data-id="${ev.id}"]`);
+      if (el) {
+        el.classList.remove('bouncing');
+        void el.offsetWidth; // reflow
+        el.classList.add('bouncing');
+        el.addEventListener('animationend', () => el.classList.remove('bouncing'), { once: true });
+      }
+    }
     activeBlocks[ev.id] = ev;
     const dur = (ev.endMs - ev.timeMs) * spriteDurationMult;
     const remaining = dur - (elapsedMs - ev.timeMs);
@@ -683,7 +694,24 @@ function bindEvents() {
     document.body.style.backgroundImage = '';
   });
 
-  // 자유 드래그
+  // 바운스 효과
+  document.getElementById('bounce-toggle').addEventListener('click', () => {
+    bounceEnabled = !bounceEnabled;
+    const btn = document.getElementById('bounce-toggle');
+    btn.textContent = bounceEnabled ? '바운스 ON' : '바운스 OFF';
+    btn.classList.toggle('active', bounceEnabled);
+    document.getElementById('bounce-settings').style.display = bounceEnabled ? 'flex' : 'none';
+  });
+  document.getElementById('bounce-px').addEventListener('input', e => {
+    const px = e.target.value;
+    document.getElementById('bounce-px-val').textContent = px + 'px';
+    document.documentElement.style.setProperty('--bounce-px', `-${px}px`);
+  });
+  document.getElementById('bounce-dur').addEventListener('input', e => {
+    const s = parseFloat(e.target.value).toFixed(1);
+    document.getElementById('bounce-dur-val').textContent = s + 's';
+    document.documentElement.style.setProperty('--bounce-dur', s + 's');
+  });
   document.getElementById('free-drag-toggle').addEventListener('click', () => {
     freeDragMode = !freeDragMode;
     const btn = document.getElementById('free-drag-toggle');
