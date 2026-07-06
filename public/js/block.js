@@ -274,7 +274,7 @@ var Cube = {
     },
 };
 
-var Time = {
+let Time = {
     initTime: 0,
     
     offset: 0,

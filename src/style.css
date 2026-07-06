@@ -9,7 +9,8 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  font-family: 'Inter', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: '맑은 고딕', 'Malgun Gothic', sans-serif;
+  font-size: 14px;
   transition: background 0.3s;
 }
 
@@ -88,13 +89,13 @@ h1 { color: #333; font-size: 11px; letter-spacing: 4px; text-transform: uppercas
 .block.no-style .block-sprite { width: 100% !important; height: 100% !important; }
 .block.no-style.active { border-color: transparent !important; box-shadow: none !important; }
 
-/* ── 팁 디스플레이 ── */
+body.custom-active .block { cursor: pointer; }
 #tip-display { font-size: 13px; color: #3d3d3d; letter-spacing: 1px; transition: color 0.3s; }
 #tip-text { transition: opacity 0.4s; }
 body.light #tip-display { color: #b1b1b1; }
 
 /* ── 타임라인 ── */
-#timeline { width: min(90vw, 640px); height: 3px; background: #1a1a2a; border-radius: 2px; overflow: hidden; }
+#timeline { width: min(90vw, 640px); height: 6px; background: #1a1a2a; border-radius: 3px; overflow: hidden; }
 #tl-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #3b46ff, #8951fb, #ff57d6); transition: width 0.1s linear; }
 
 #status { font-size: 10px; color: #555; letter-spacing: 3px; font-weight: 500; }
@@ -265,3 +266,122 @@ body.light .sprite-tile-item {
 }
 body.light .sprite-tile-item .tile-num { color: #bbb; }
 body.light .sprite-tile-item .tile-sub { color: #ccc; }
+
+/* ── 로딩 화면 ── */
+#loading-screen {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #0a0a0f;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 1; transition: opacity 0.6s ease;
+}
+#loading-screen.fade-out { opacity: 0; pointer-events: none; }
+#loading-screen.hidden { display: none; }
+
+#loading-content {
+  display: flex; flex-direction: column; align-items: center; gap: 24px;
+  opacity: 0; animation: loading-fade-in 0.8s ease 0.2s forwards;
+}
+@keyframes loading-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#loading-title {
+  font-size: 28px; letter-spacing: 12px;
+  color: #fff; font-family: 'Courier New', monospace;
+}
+
+#loading-desc {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 15px; color: #888; line-height: 1.8;
+  font-family: '맑은 고딕', 'Malgun Gothic', sans-serif; text-align: center;
+}
+
+#loading-bar-wrap {
+  width: 280px; height: 2px;
+  background: #1a1a2a; border-radius: 2px; overflow: hidden;
+}
+#loading-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #3b46ff, #8951fb, #ff57d6);
+  transition: width 0.3s ease;
+}
+
+/* ── ui-toggle 이미지 ── */
+#ui-toggle {
+  padding: 0; overflow: hidden;
+  background: none; border: none;
+}
+#ui-toggle img {
+  width: 32px; height: 32px;
+  object-fit: contain;
+  opacity: 0.6; transition: opacity 0.15s;
+}
+#ui-toggle:hover img { opacity: 1; }
+
+/* ── 팝업 x버튼 크게 ── */
+#sprite-modal-close {
+  font-size: 26px !important;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ── 로딩 by 텍스트 ── */
+#loading-by {
+  font-size: 11px; color: #444;
+  letter-spacing: 3px; font-family: 'Courier New', monospace;
+  opacity: 0;
+  animation: by-fade 2s ease 1s forwards;
+}
+@keyframes by-fade {
+  0%   { opacity: 0; }
+  30%  { opacity: 1; }
+  70%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── 설정 카테고리 헤더 ── */
+.setting-category {
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: #8951fb; border-bottom: 1px solid #2a2a3a;
+  padding-bottom: 4px; margin-top: 4px;
+}
+body.light .setting-category { color: #8951fb; border-color: #dddde8; }
+
+#settings-modal-inner { width: 380px !important; }
+
+/* ── 팝업 상단 버튼 ── */
+.sprite-modal-btn {
+  background: #1a1a26; border: 1px solid #2a2a3a; color: #666;
+  padding: 4px 10px; font-size: 9px; font-family: 'Courier New', monospace;
+  cursor: pointer; border-radius: 4px; transition: all 0.15s; white-space: nowrap;
+}
+.sprite-modal-btn:hover { border-color: #555; color: #ccc; }
+.sprite-modal-btn.active { border-color: #8951fb; color: #8951fb; }
+
+/* 교체모드일 때 타일에 선택 표시 */
+.sprite-tile-item.swap-selected {
+  border-color: #ff57d6 !important;
+  border-style: solid !important;
+  box-shadow: 0 0 8px -2px #ff57d6;
+}
+
+/* 설정 레이블 숨기기 */
+#settings-modal-inner .setting-label { display: none; }
+#settings-modal-inner .setting-label.show-label { display: block; }
+
+#loading-screen { cursor: pointer; }
+#loading-skip {
+  font-size: 11px; color: #333;
+  font-family: '맑은 고딕', 'Malgun Gothic', sans-serif;
+  animation: loading-fade-in 1s ease 2s both;
+}
+
+#loading-link {
+  font-size: 40px;
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  margin-bottom: 8px;
+}
+#loading-link:hover { text-decoration: underline; opacity: 0.8; }

@@ -17,6 +17,12 @@ let noStyleMode = false;
 let tileLabelVisible = false;
 let customMode = false;
 let spriteDurationMult = 1.0;
+let bgPlayEnabled = true; // 백그라운드 재생
+
+// 팝업 스왑 모드
+let swapMode = false;
+let swapFirstKey = null; // 첫번째 선택한 타일 key
+let swapModalId = null;  // 현재 열린 팝업 블록 id
 
 // 오디오 상태
 let isPlaying = false;
@@ -119,7 +125,7 @@ function buildGrid() {
       <div class="block-mute-icon">🔇</div>`;
 
     el.addEventListener('click', () => {
-      if (!freeDragMode) openSpriteModal(id);
+      if (!freeDragMode && customMode) openSpriteModal(id);
     });
     el.addEventListener('contextmenu', e => {
       e.preventDefault();
@@ -150,6 +156,7 @@ function removeDefaultImages() {
 function toggleCustomMode(on) {
   customMode = on;
   setCustomMode(on);
+  document.body.classList.toggle('custom-active', on);
   if (on) {
     removeDefaultImages();
   } else {
@@ -266,7 +273,32 @@ function makeTileItem(id, key, labelText, color) {
   fileInput.style.display = 'none';
 
   item.append(img, numEl, subEl, fileInput);
-  item.addEventListener('click', () => fileInput.click());
+  item.addEventListener('click', () => {
+    if (swapMode) {
+      // 교체 모드
+      if (!swapFirstKey) {
+        // 첫번째 선택
+        swapFirstKey = key;
+        item.classList.add('swap-selected');
+      } else if (swapFirstKey === key) {
+        // 같은 거 다시 클릭 → 취소
+        swapFirstKey = null;
+        item.classList.remove('swap-selected');
+      } else {
+        // 두번째 선택 → 스왑
+        const tmp = spriteImages[swapFirstKey];
+        spriteImages[swapFirstKey] = spriteImages[key];
+        if (tmp) spriteImages[key] = tmp;
+        else delete spriteImages[key];
+        // 팝업 새로고침
+        swapFirstKey = null;
+        document.querySelectorAll('.sprite-tile-item').forEach(el => el.classList.remove('swap-selected'));
+        openSpriteModal(swapModalId);
+      }
+    } else {
+      fileInput.click();
+    }
+  });
   if (spriteImages[key]) {
     item.style.borderColor = color;
     item.style.borderStyle = 'solid';
@@ -292,6 +324,10 @@ function makeTileItem(id, key, labelText, color) {
 }
 
 function openSpriteModal(id) {
+  swapModalId = id;
+  swapFirstKey = null;
+  // 교체모드 버튼 상태 유지
+  document.getElementById('swap-mode-btn').classList.toggle('active', swapMode);
   const tileCount = Tiles?.[id]?.length ?? 0;
   const nameEl = document.getElementById('sprite-modal-block-name');
   nameEl.textContent = `${BLOCK_NAMES[id]}  (Block ${id})`;
@@ -309,13 +345,60 @@ function openSpriteModal(id) {
 
   const tileGrid = document.getElementById('sprite-tile-grid');
   tileGrid.innerHTML = '';
+
+  // 기본 이미지 슬롯
   const defaultItem = makeTileItem(id, `${id}_default`, '기본 이미지', BLOCK_COLORS[id]);
   defaultItem.classList.add('sprite-tile-default');
   tileGrid.appendChild(defaultItem);
+
+  // 종료 이미지 슬롯
+  const endItem = makeTileItem(id, `${id}_end`, '종료 이미지', BLOCK_COLORS[id]);
+  endItem.classList.add('sprite-tile-default');
+  tileGrid.appendChild(endItem);
+
   for (let t = 0; t < tileCount; t++) {
     tileGrid.appendChild(makeTileItem(id, `${id}_${t}`, `TILE ${t}`, BLOCK_COLORS[id]));
   }
   document.getElementById('sprite-modal').classList.add('open');
+}
+
+// ── 시크 ─────────────────────────────────────────
+async function seekTo(ratio) {
+  if (!_ctx || _songDuration === 0) return;
+  const wasPlaying = isPlaying;
+
+  // 현재 재생 멈추기
+  if (animFrame) cancelAnimationFrame(animFrame);
+  activeTimers.forEach(clearTimeout); activeTimers = [];
+  activeBlockTimers.fill(null);
+  for (let id = 0; id < 16; id++) deactivateBlock(id);
+
+  // 시크 위치 계산
+  const seekMs = ratio * _songDuration;
+  _startTime = _ctx.currentTime - seekMs / 1000;
+
+  // 오디오 이벤트 포인터 재계산
+  _audioPtr = 0;
+  while (_audioPtr < _audioEvents.length && _audioEvents[_audioPtr].t < _ctx.currentTime - 0.05) {
+    _audioPtr++;
+  }
+
+  // 스프라이트 이벤트 포인터 재계산
+  _spritePtr = 0;
+  while (_spritePtr < _spriteEvents.length && _spriteEvents[_spritePtr].timeMs < seekMs) {
+    _spritePtr++;
+  }
+
+  if (wasPlaying || isPaused) {
+    if (isPaused) {
+      await _ctx.resume();
+      isPaused = false;
+    }
+    isPlaying = true;
+    document.getElementById('btn-play').textContent = '⏸ Pause';
+    document.getElementById('status').textContent = 'PLAYING';
+    loop();
+  }
 }
 
 // ── 재생 ─────────────────────────────────────────
@@ -355,7 +438,39 @@ async function playSong() {
   document.getElementById('btn-play').disabled = false;
   document.getElementById('btn-stop').disabled = false;
   isPlaying = true; isPaused = false;
-  loop();
+
+  // 백그라운드 재생 지원: setInterval + rAF 둘 다 사용
+  let intervalId = null;
+  function startLoop() {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    if (intervalId) clearInterval(intervalId);
+    if (bgPlayEnabled) {
+      intervalId = setInterval(loop, 50);
+    } else {
+      animFrame = requestAnimationFrame(loop);
+    }
+  }
+  startLoop();
+  // bgPlayEnabled 변경 감지
+  const _bgWatcher = setInterval(() => {
+    if (!isPlaying) { clearInterval(_bgWatcher); return; }
+    if (bgPlayEnabled && !intervalId) {
+      if (animFrame) cancelAnimationFrame(animFrame);
+      animFrame = null;
+      intervalId = setInterval(loop, 50);
+    } else if (!bgPlayEnabled && intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+      animFrame = requestAnimationFrame(loop);
+    }
+  }, 500);
+
+  function stopLoop() {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    if (intervalId) clearInterval(intervalId);
+    animFrame = null; intervalId = null;
+  }
+  playSong._stopLoop = stopLoop;
 }
 
 function pauseSong() {
@@ -420,12 +535,11 @@ function loop() {
   }
 
   if (elapsedMs >= _songDuration) { 
-    // 곡 끝: 모든 블록을 첫 번째(default) 이미지로 복귀
     for (let id = 0; id < 16; id++) deactivateBlock(id);
     stopSong(); 
     return; 
   }
-  animFrame = requestAnimationFrame(loop);
+  if (!bgPlayEnabled) animFrame = requestAnimationFrame(loop);
 }
 
 // ── 이벤트 바인딩 ─────────────────────────────────
@@ -435,12 +549,14 @@ function bindEvents() {
   });
   document.getElementById('btn-stop').addEventListener('click', stopSong);
 
+  // 타임라인 (시크 기능 제거 - 진행률 표시만)
+
   // UI 토글
   let uiVisible = true;
   document.getElementById('ui-toggle').addEventListener('click', () => {
     uiVisible = !uiVisible;
     document.getElementById('ui-wrapper').classList.toggle('hidden', !uiVisible);
-    document.getElementById('main-title').classList.toggle('hidden', !uiVisible);
+    document.getElementById('main-title')?.classList.toggle('hidden', !uiVisible);
   });
 
   // 설정 모달
@@ -453,6 +569,42 @@ function bindEvents() {
   document.getElementById('settings-modal').addEventListener('click', e => {
     if (e.target === document.getElementById('settings-modal'))
       document.getElementById('settings-modal').classList.remove('open');
+  });
+
+  // 백그라운드 재생 토글
+  document.getElementById('bg-play-toggle').addEventListener('click', () => {
+    bgPlayEnabled = !bgPlayEnabled;
+    const btn = document.getElementById('bg-play-toggle');
+    btn.textContent = bgPlayEnabled ? '백그라운드 재생 ON' : '백그라운드 재생 OFF';
+    btn.classList.toggle('active', bgPlayEnabled);
+  });
+
+  // 다중선택 업로드
+  document.getElementById('multi-select-btn').addEventListener('click', () => {
+    document.getElementById('multi-file-input').click();
+  });
+  document.getElementById('multi-file-input').addEventListener('change', e => {
+    const files = [...e.target.files];
+    const id = swapModalId;
+    const tileCount = Tiles?.[id]?.length ?? 0;
+    // 기본 이미지부터 순서대로: default → 0 → 1 → 2 ...
+    const keys = [`${id}_default`, ...Array.from({length: tileCount}, (_, t) => `${id}_${t}`)];
+    files.forEach((file, i) => {
+      if (i >= keys.length) return;
+      spriteImages[keys[i]] = URL.createObjectURL(file);
+    });
+    e.target.value = '';
+    openSpriteModal(id); // 팝업 새로고침
+  });
+
+  // 교체모드 토글
+  document.getElementById('swap-mode-btn').addEventListener('click', () => {
+    swapMode = !swapMode;
+    swapFirstKey = null;
+    document.querySelectorAll('.sprite-tile-item').forEach(el => el.classList.remove('swap-selected'));
+    const btn = document.getElementById('swap-mode-btn');
+    btn.textContent = swapMode ? '⇄ 교체모드 ON' : '⇄ 교체모드';
+    btn.classList.toggle('active', swapMode);
   });
 
   // 그리드 세로 위치
@@ -638,26 +790,50 @@ function startTips() {
 
 // ── 초기화 ───────────────────────────────────────
 async function init() {
+  const loadingBar = document.getElementById('loading-bar');
+  const loadingScreen = document.getElementById('loading-screen');
+
+  loadingBar.style.width = '10%';
   await loadGameData();
+  loadingBar.style.width = '40%';
+
   buildGrid();
   bindEvents();
   startTips();
+  loadingBar.style.width = '60%';
+
   // 기본: 화이트모드 + 기본 이미지
   document.body.classList.add('light');
   document.getElementById('theme-toggle').textContent = '화이트 모드';
-  // 타일 레이블 초기값 설정
   document.documentElement.style.setProperty('--tile-label-display', 'none');
   document.getElementById('tile-label-toggle').textContent = '타일 레이블 OFF';
   document.getElementById('tile-label-toggle').classList.remove('active');
   applyDefaultImages();
-  toggleCustomMode(false); // 기본 이미지 블록에 표시
+  toggleCustomMode(false);
+
   await Promise.all(Array.from({length: 16}, async (_, i) => {
     try {
       const res = await fetch(`/song/${i}.json`);
       songData[i] = await res.json();
     } catch(e) { songData[i] = []; }
   }));
+
+  loadingBar.style.width = '100%';
   document.getElementById('status').textContent = 'READY';
+
+  function fadeOutLoading() {
+    loadingScreen.classList.add('fade-out');
+    setTimeout(() => loadingScreen.classList.add('hidden'), 900);
+  }
+
+  // 클릭으로 스킵
+  loadingScreen.addEventListener('click', e => {
+    if (e.target.closest('a')) return; // 링크 클릭은 스킵 안 함
+    fadeOutLoading();
+  });
+
+  // 5초 후 자동 페이드아웃
+  setTimeout(fadeOutLoading, 5000);
 }
 
 init();

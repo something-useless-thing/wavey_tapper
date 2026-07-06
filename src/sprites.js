@@ -1,6 +1,6 @@
 // sprites.js - 스프라이트 이벤트 빌드 및 블록 UI
 
-import { BIT_MS, BLOCK_COLORS, TILE_FOLDERS, TILE_OFFSETS, TEXT_TILE_FILES } from './constants.js';
+import { BIT_MS, BLOCK_COLORS, TILE_FOLDERS, TILE_OFFSETS, BLOCK_FILTERS } from './constants.js';
 
 // 전역 스프라이트 이미지 저장소
 export const spriteImages = {}; // "id_tileIdx" → url, "id_default" → url
@@ -124,23 +124,31 @@ export function deactivateBlock(id) {
   el.querySelector('.block-tile').textContent = '';
 
   const img = el.querySelector('.block-sprite');
+  const endKey = `${id}_end`;
   const defaultKey = `${id}_default`;
 
-  if (spriteImages[defaultKey]) {
-    // 커스텀 기본 이미지
-    img.src = spriteImages[defaultKey];
+  // 우선순위: 종료 이미지 → 기본 이미지 → 빈 상태 (타일0번 자동 표시 안 함)
+  const showKey = spriteImages[endKey] ? endKey
+    : spriteImages[defaultKey] ? defaultKey
+    : null;
+
+  if (showKey) {
+    img.src = spriteImages[showKey];
     img.style.filter = '';
     img.style.display = 'block';
+    el.querySelector('.block-placeholder').style.display = 'none';
+  } else if (!isCustomMode) {
+    // 기본모드: 그냥 비어있게 (첫번째 타일 자동 표시 안 함)
+    img.style.display = 'none';
+    img.style.filter = '';
     el.querySelector('.block-placeholder').style.display = 'none';
   } else {
     img.style.display = 'none';
     img.style.filter = '';
     if (isCustomMode) {
-      // 커스텀모드: 배경 글자(번호/이름) 표시
       el.querySelector('.block-num').textContent = id;
       el.querySelector('.block-placeholder').style.display = 'flex';
     } else {
-      // 기본모드: 배경 글자 숨김
       el.querySelector('.block-placeholder').style.display = 'none';
     }
   }

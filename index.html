@@ -7,13 +7,27 @@
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
+  <!-- 로딩 화면 -->
+  <div id="loading-screen">
+    <div id="loading-content">
+      <div id="loading-desc">
+        <p><a href="https://youtu.be/-lRPEny5jug?si=bhIECoX4Non2j8pj" target="_blank" id="loading-link">frums-wavetapper</a>에서 영감을 받았습니다</p>
+        <p>각 블록의 캐릭터 스프라이트를 입혀서 커스텀할 수 있어요!</p>
+        <p>설정에서 커스텀 모드를 켜서 시작하실 수 있습니다</p>
+      </div>
+      <div id="loading-bar-wrap">
+        <div id="loading-bar"></div>
+      </div>
+      <div id="loading-by">by heewon0010</div>
+      <div id="loading-skip">클릭해서 건너뛰기</div>
+    </div>
+  </div>
   <!-- 항상 보이는 fixed 버튼들 -->
-  <button id="ui-toggle">◈</button>
+  <button id="ui-toggle"><img src="/img/toggle.png" alt="toggle"></button>
 
-  <!-- 메인 타이틀 (그리드 위, UI 숨겨도 유지) -->
-  <h1 id="main-title">Wavetapper(with custom sprites) -by heewon0010</h1>
-
-  <!-- 블록 그리드 / 자유드래그 스테이지 (ui-wrapper 바깥 → UI 숨겨도 유지) -->
+  <!-- 메인 타이틀 -->
+  <h1 id="main-title">frums-wavetapper (but with custom sprites) - by heewon0010</h1>
+  <!-- 블록 그리드 / 자유드래그 스테이지 -->
   <div id="grid"></div>
   <div id="free-stage"></div>
 
@@ -32,60 +46,70 @@
   <div id="settings-modal">
     <div id="settings-modal-inner">
       <div id="settings-modal-title">
-        <span>Settings</span>
+        <span>설정</span>
         <button id="settings-modal-close">×</button>
       </div>
+
+      <!-- 일반 -->
+      <div class="setting-category">일반</div>
       <div class="setting-row">
-        <div class="setting-label">테마</div>
-        <div class="setting-row-btns">
-          <button class="setting-toggle" id="theme-toggle">Dark Mode</button>
-          <button class="setting-toggle" id="custom-mode-toggle">Custom Mode OFF</button>
-        </div>
+        <div class="setting-label">백그라운드 재생</div>
+        <button class="setting-toggle active" id="bg-play-toggle">백그라운드 재생 ON</button>
       </div>
       <div class="setting-row">
-        <div class="setting-label">Background Color</div>
+        <div class="setting-label">테마 / 모드</div>
+        <div class="setting-row-btns">
+          <button class="setting-toggle" id="theme-toggle">다크모드</button>
+          <button class="setting-toggle" id="custom-mode-toggle">커스텀 모드</button>
+        </div>
+      </div>
+
+      <!-- 배경 -->
+      <div class="setting-category">배경</div>
+      <div class="setting-row">
+        <div class="setting-label">배경 색깔</div>
         <input type="color" id="bg-color" value="#0a0a0f">
       </div>
       <div class="setting-row">
-        <div class="setting-label">Background Image</div>
+        <div class="setting-label">배경 이미지</div>
         <div class="setting-row-btns">
           <label class="setting-file-label" for="bg-image-input">+ 이미지 업로드</label>
           <input type="file" id="bg-image-input" accept="image/*" style="display:none">
           <button class="setting-toggle" id="bg-image-clear">배경 이미지 제거</button>
         </div>
       </div>
+
+      <!-- UI -->
+      <div class="setting-category">UI</div>
       <div class="setting-row">
-        <div class="setting-label">Grid 세로 위치  <span id="grid-offset-val">0px</span></div>
+        <div class="setting-label show-label">그리드 세로 위치  <span id="grid-offset-val">0px</span></div>
         <input type="range" id="grid-offset" min="-400" max="400" value="0" step="4">
       </div>
       <div class="setting-row">
-        <div class="setting-label">Block Size  <span id="block-size-val">120px</span></div>
+        <div class="setting-label show-label">블럭 크기  <span id="block-size-val">120px</span></div>
         <input type="range" id="block-size" min="60" max="240" value="120" step="4">
       </div>
       <div class="setting-row">
-        <div class="setting-label">Border Radius  <span id="block-radius-val">0px</span></div>
+        <div class="setting-label show-label">모서리 둥글기  <span id="block-radius-val">0px</span></div>
         <input type="range" id="block-radius" min="0" max="60" value="0" step="2">
       </div>
       <div class="setting-row">
-        <div class="setting-label">Sprite 표시 시간  <span id="sprite-dur-val">1.0×</span></div>
+        <div class="setting-label show-label">스프라이트 표시 시간  <span id="sprite-dur-val">1.0×</span></div>
         <input type="range" id="sprite-dur" min="1" max="20" value="1" step="0.5">
       </div>
       <div class="setting-row">
-        <div class="setting-label">Block Layout</div>
+        <div class="setting-label show-label">블럭 레이아웃</div>
         <div class="setting-row-btns">
           <button class="setting-toggle" id="free-drag-toggle">자유 드래그 OFF</button>
           <button class="setting-toggle" id="free-pos-reset">위치 초기화</button>
         </div>
       </div>
       <div class="setting-row">
-        <div class="setting-label">Style</div>
+        <div class="setting-label">스타일 / 표시</div>
         <div class="setting-row-btns">
           <button class="setting-toggle" id="no-style-toggle">스타일 없애기 OFF</button>
           <button class="setting-toggle" id="tile-label-toggle">타일 레이블 ON</button>
         </div>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">UI</div>
         <div class="setting-row-btns">
           <button class="setting-toggle" id="tip-toggle">팁 표시 ON</button>
           <button class="setting-toggle" id="title-toggle">타이틀 표시 ON</button>
@@ -98,7 +122,14 @@
     <div id="sprite-modal-inner">
       <div id="sprite-modal-title">
         <span id="sprite-modal-block-name">BLOCK 0</span>
-        <button id="sprite-modal-close">×</button>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="sprite-modal-btn" id="multi-select-btn" title="여러 이미지 한번에 업로드">
+            <input type="file" id="multi-file-input" accept="image/*" multiple style="display:none">
+            📂 다중선택
+          </button>
+          <button class="sprite-modal-btn" id="swap-mode-btn" title="타일 이미지 서로 교체">⇄ 교체모드</button>
+          <button id="sprite-modal-close">×</button>
+        </div>
       </div>
       <div class="setting-row">
         <div class="setting-label">블럭 크기  <span id="block-individual-size-val">120px</span></div>
