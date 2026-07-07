@@ -19,12 +19,15 @@ let customMode = false;
 let spriteDurationMult = 1.0;
 let bgPlayEnabled = true;
 let bounceEnabled = false;
-let lang = 'ko'; // 'ko' | 'en'
+let lang = 'ko';
+let autoTheme = true;
+let themeMode = 'auto'; // 'dark' | 'light' | 'auto'
 
 const STRINGS = {
   ko: {
     settings: '설정', bgPlay: '백그라운드 재생', bgPlayOn: '백그라운드 재생 ON', bgPlayOff: '백그라운드 재생 OFF',
-    darkMode: '다크모드', lightMode: '화이트 모드', customMode: '커스텀 모드', customModeOn: '커스텀 모드 ON',
+    darkMode: '다크모드', lightMode: '화이트 모드', autoThemeMode: '자동', customMode: '커스텀 모드', customModeOn: '커스텀 모드 ON',
+    autoTheme: '자동 테마 ON', autoThemeOff: '자동 테마 OFF',
     bgColor: '배경 색깔', bgImage: '+ 이미지 업로드', bgClear: '배경 이미지 제거',
     gridOffset: '그리드 세로 위치', blockSize: '블럭 크기', radius: '모서리 둥글기',
     spriteDur: '스프라이트 표시 시간', bounce: '바운스 효과', bounceOn: '바운스 ON', bounceOff: '바운스 OFF',
@@ -41,7 +44,8 @@ const STRINGS = {
   },
   en: {
     settings: 'Settings', bgPlay: 'Background Play', bgPlayOn: 'BG Play ON', bgPlayOff: 'BG Play OFF',
-    darkMode: 'Dark Mode', lightMode: 'Light Mode', customMode: 'Custom Mode', customModeOn: 'Custom Mode ON',
+    darkMode: 'Dark Mode', lightMode: 'Light Mode', autoThemeMode: 'Auto', customMode: 'Custom Mode', customModeOn: 'Custom Mode ON',
+    autoTheme: 'Auto Theme ON', autoThemeOff: 'Auto Theme OFF',
     bgColor: 'BG Color', bgImage: '+ Upload Image', bgClear: 'Remove BG Image',
     gridOffset: 'Grid Offset', blockSize: 'Block Size', radius: 'Border Radius',
     spriteDur: 'Sprite Duration', bounce: 'Bounce Effect', bounceOn: 'Bounce ON', bounceOff: 'Bounce OFF',
@@ -67,7 +71,9 @@ function applyLang() {
 
   // 버튼들
   $('bg-play-toggle').textContent = bgPlayEnabled ? s.bgPlayOn : s.bgPlayOff;
-  $('theme-toggle').textContent = document.body.classList.contains('light') ? s.darkMode : s.lightMode;
+  $('auto-theme-toggle')?.textContent && ($('auto-theme-toggle').textContent = autoTheme ? s.autoTheme : s.autoThemeOff);
+  const themeLabels = { dark: s.darkMode, light: s.lightMode, auto: s.autoThemeMode };
+  $('theme-toggle').textContent = themeLabels[themeMode];
   $('custom-mode-toggle').textContent = customMode ? s.customModeOn : s.customMode;
   $('bg-image-clear').textContent = s.bgClear;
   const bgImageLabel = document.querySelector('label[for="bg-image-input"]');
@@ -107,10 +113,15 @@ function applyLang() {
   };
   document.querySelectorAll('.setting-label.show-label').forEach(el => {
     const span = el.querySelector('span');
-    if (!span) return;
-    const spanId = span.id;
-    if (labelMap[spanId]) {
-      el.childNodes[0].textContent = labelMap[spanId] + '  ';
+    if (span) {
+      const spanId = span.id;
+      if (labelMap[spanId]) el.childNodes[0].textContent = labelMap[spanId] + '  ';
+    } else {
+      // span 없는 레이블 (바운스 효과, 블럭 레이아웃, 스타일/표시)
+      const txt = el.textContent.trim();
+      if (txt === '바운스 효과' || txt === 'Bounce Effect') el.textContent = s.bounce;
+      else if (txt === '블럭 레이아웃' || txt === 'Block Layout') el.textContent = s.blockLayout;
+      else if (txt === '스타일 / 표시' || txt === 'Style / Display') el.textContent = s.styleDisplay;
     }
   });
 } // 백그라운드 재생
@@ -355,6 +366,17 @@ function exitFreeDrag() {
   document.querySelectorAll('body > .block').forEach(el => {
     el.style.cursor = 'default';
   });
+}
+
+// ── 자동 테마 ─────────────────────────────────────
+function applyAutoTheme(hex) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  const luminance = 0.299*r + 0.587*g + 0.114*b;
+  const isLight = luminance > 127.5;
+  document.body.classList.toggle('light', isLight);
+  applyLang();
 }
 
 // ── 스프라이트 편집 팝업 ──────────────────────────
@@ -757,29 +779,39 @@ function bindEvents() {
     document.getElementById('sprite-dur-val').textContent = spriteDurationMult.toFixed(1) + '×';
   });
 
-  // 테마 토글
+  // 테마 토글 (다크 → 라이트 → 자동 순환)
   document.getElementById('theme-toggle').addEventListener('click', () => {
-    const isLight = document.body.classList.toggle('light');
-    const btn = document.getElementById('theme-toggle');
-    btn.textContent = isLight ? '화이트 모드' : '다크 모드';
+    if (themeMode === 'dark') themeMode = 'light';
+    else if (themeMode === 'light') themeMode = 'auto';
+    else themeMode = 'dark';
+    autoTheme = themeMode === 'auto';
+    if (themeMode === 'dark') document.body.classList.remove('light');
+    else if (themeMode === 'light') document.body.classList.add('light');
+    else {
+      const color = document.getElementById('bg-color').value;
+      applyAutoTheme(color);
+    }
+    applyLang();
   });
 
   // 커스텀 모드 토글
   document.getElementById('custom-mode-toggle').addEventListener('click', () => {
     customMode = !customMode;
     toggleCustomMode(customMode);
-    const btn = document.getElementById('custom-mode-toggle');
-    btn.textContent = customMode ? '커스텀 모드 ON' : '커스텀 모드 OFF';
-    btn.classList.toggle('active', customMode);
-    // 커스텀 ON → 다크모드, OFF → 라이트모드
-    const isLight = !customMode;
-    document.body.classList.toggle('light', isLight);
+    document.getElementById('custom-mode-toggle').classList.toggle('active', customMode);
+    if (themeMode === 'auto') {
+      const color = document.getElementById('bg-color').value;
+      applyAutoTheme(color);
+    } else {
+      document.body.classList.toggle('light', themeMode === 'light');
+    }
     applyLang();
   });
 
   // 배경색
   document.getElementById('bg-color').addEventListener('input', e => {
     document.body.style.background = e.target.value;
+    if (autoTheme) applyAutoTheme(e.target.value);
   });
 
   // 배경 이미지
@@ -790,6 +822,26 @@ function bindEvents() {
     document.body.style.backgroundImage = `url(${url})`;
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
+
+    // 자동 테마: 이미지 밝기 감지
+    if (autoTheme) {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 50; canvas.height = 50; // 작게 샘플링
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 50, 50);
+        const data = ctx.getImageData(0, 0, 50, 50).data;
+        let total = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          total += 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+        }
+        const avg = total / (data.length / 4);
+        document.body.classList.toggle('light', avg > 127.5);
+        applyLang();
+      };
+      img.src = url;
+    }
   });
   document.getElementById('bg-image-clear').addEventListener('click', () => {
     document.body.style.backgroundImage = '';
@@ -937,6 +989,8 @@ async function init() {
 
   // 기본: 화이트모드 + 기본 이미지
   document.body.classList.add('light');
+  themeMode = 'auto';
+  autoTheme = true;
   document.getElementById('theme-toggle').textContent = '화이트 모드';
   document.documentElement.style.setProperty('--tile-label-display', 'none');
   document.getElementById('tile-label-toggle').textContent = '타일 레이블 OFF';
