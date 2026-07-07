@@ -394,3 +394,11 @@ body.light .setting-category { color: #8951fb; border-color: #dddde8; }
 .block.bouncing {
   animation: block-bounce var(--bounce-dur, 0.4s) ease-out;
 }
+
+/* ── 언어 토글 ── */
+#lang-toggle {
+  background: none; border: none; font-size: 20px;
+  cursor: pointer; line-height: 1; padding: 0;
+  transition: transform 0.15s;
+}
+#lang-toggle:hover { transform: scale(1.15); }

@@ -47,7 +47,10 @@
     <div id="settings-modal-inner">
       <div id="settings-modal-title">
         <span>설정</span>
-        <button id="settings-modal-close">×</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="lang-toggle" title="언어 변경">🇰🇷</button>
+          <button id="settings-modal-close">×</button>
+        </div>
       </div>
 
       <!-- 일반 -->
@@ -67,16 +70,12 @@
       <!-- 배경 -->
       <div class="setting-category">배경</div>
       <div class="setting-row">
-        <div class="setting-label">배경 색깔</div>
-        <input type="color" id="bg-color" value="#0a0a0f">
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">배경 이미지</div>
         <div class="setting-row-btns">
-          <label class="setting-file-label" for="bg-image-input">+ 이미지 업로드</label>
+          <input type="color" id="bg-color" value="#0a0a0f" style="flex:1;height:32px;cursor:pointer;border:1px solid #2a2a3a;border-radius:4px;background:#1a1a26;padding:2px;">
+          <label class="setting-file-label" for="bg-image-input" style="flex:1;text-align:center;">+ 이미지 업로드</label>
           <input type="file" id="bg-image-input" accept="image/*" style="display:none">
-          <button class="setting-toggle" id="bg-image-clear">배경 이미지 제거</button>
         </div>
+        <button class="setting-toggle" id="bg-image-clear">배경 이미지 제거</button>
       </div>
 
       <!-- UI -->

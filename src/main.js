@@ -18,7 +18,102 @@ let tileLabelVisible = false;
 let customMode = false;
 let spriteDurationMult = 1.0;
 let bgPlayEnabled = true;
-let bounceEnabled = false; // 백그라운드 재생
+let bounceEnabled = false;
+let lang = 'ko'; // 'ko' | 'en'
+
+const STRINGS = {
+  ko: {
+    settings: '설정', bgPlay: '백그라운드 재생', bgPlayOn: '백그라운드 재생 ON', bgPlayOff: '백그라운드 재생 OFF',
+    darkMode: '다크모드', lightMode: '화이트 모드', customMode: '커스텀 모드', customModeOn: '커스텀 모드 ON',
+    bgColor: '배경 색깔', bgImage: '+ 이미지 업로드', bgClear: '배경 이미지 제거',
+    gridOffset: '그리드 세로 위치', blockSize: '블럭 크기', radius: '모서리 둥글기',
+    spriteDur: '스프라이트 표시 시간', bounce: '바운스 효과', bounceOn: '바운스 ON', bounceOff: '바운스 OFF',
+    bounceHeight: '바운스 높이', bounceDur: '바운스 시간',
+    freeDrag: '자유 드래그 OFF', freeDragOn: '자유 드래그 ON', posReset: '위치 초기화',
+    blockLayout: '블럭 레이아웃', styleDisplay: '스타일 / 표시',
+    noStyle: '스타일 없애기 OFF', noStyleOn: '스타일 없애기 ON',
+    tileLabel: '타일 레이블 OFF', tileLabelOn: '타일 레이블 ON',
+    tip: '팁 표시 ON', tipOff: '팁 표시 OFF', title: '타이틀 표시 ON', titleOff: '타이틀 표시 OFF',
+    play: '▶ Play', pause: '⏸ Pause', stop: '■ Stop', settings2: '⚙ Settings',
+    ready: 'READY', playing: 'PLAYING', paused: 'PAUSED', loading: 'LOADING...',
+    general: '일반', background: '배경', ui: 'UI',
+    multiSelect: '다중선택', swapMode: '⇄ 교체모드', swapModeOn: '⇄ 교체모드 ON',
+  },
+  en: {
+    settings: 'Settings', bgPlay: 'Background Play', bgPlayOn: 'BG Play ON', bgPlayOff: 'BG Play OFF',
+    darkMode: 'Dark Mode', lightMode: 'Light Mode', customMode: 'Custom Mode', customModeOn: 'Custom Mode ON',
+    bgColor: 'BG Color', bgImage: '+ Upload Image', bgClear: 'Remove BG Image',
+    gridOffset: 'Grid Offset', blockSize: 'Block Size', radius: 'Border Radius',
+    spriteDur: 'Sprite Duration', bounce: 'Bounce Effect', bounceOn: 'Bounce ON', bounceOff: 'Bounce OFF',
+    bounceHeight: 'Bounce Height', bounceDur: 'Bounce Duration',
+    freeDrag: 'Free Drag OFF', freeDragOn: 'Free Drag ON', posReset: 'Reset Position',
+    blockLayout: 'Block Layout', styleDisplay: 'Style / Display',
+    noStyle: 'No Style OFF', noStyleOn: 'No Style ON',
+    tileLabel: 'Tile Label OFF', tileLabelOn: 'Tile Label ON',
+    tip: 'Tips ON', tipOff: 'Tips OFF', title: 'Title ON', titleOff: 'Title OFF',
+    play: '▶ Play', pause: '⏸ Pause', stop: '■ Stop', settings2: '⚙ Settings',
+    ready: 'READY', playing: 'PLAYING', paused: 'PAUSED', loading: 'LOADING...',
+    general: 'General', background: 'Background', ui: 'UI',
+    multiSelect: 'Multi Select', swapMode: '⇄ Swap Mode', swapModeOn: '⇄ Swap ON',
+  }
+};
+
+function applyLang() {
+  const s = STRINGS[lang];
+  const $ = id => document.getElementById(id);
+
+  // 설정 모달 제목
+  $('settings-modal-title').querySelector('span').textContent = s.settings;
+
+  // 버튼들
+  $('bg-play-toggle').textContent = bgPlayEnabled ? s.bgPlayOn : s.bgPlayOff;
+  $('theme-toggle').textContent = document.body.classList.contains('light') ? s.darkMode : s.lightMode;
+  $('custom-mode-toggle').textContent = customMode ? s.customModeOn : s.customMode;
+  $('bg-image-clear').textContent = s.bgClear;
+  const bgImageLabel = document.querySelector('label[for="bg-image-input"]');
+  if (bgImageLabel) bgImageLabel.textContent = s.bgImage;
+  $('bounce-toggle').textContent = bounceEnabled ? s.bounceOn : s.bounceOff;
+  $('free-drag-toggle').textContent = freeDragMode ? s.freeDragOn : s.freeDrag;
+  $('free-pos-reset').textContent = s.posReset;
+  $('no-style-toggle').textContent = noStyleMode ? s.noStyleOn : s.noStyle;
+  $('tile-label-toggle').textContent = tileLabelVisible ? s.tileLabelOn : s.tileLabel;
+  $('tip-toggle').textContent = s.tip;
+  $('title-toggle').textContent = s.title;
+  $('btn-play').textContent = isPlaying ? s.pause : s.play;
+  $('btn-stop').textContent = s.stop;
+  $('settings-btn').textContent = s.settings2;
+
+  // 다중선택 버튼 텍스트 (input 태그 안에 있음)
+  const multiBtn = $('multi-select-btn');
+  if (multiBtn) {
+    const textNode = [...multiBtn.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+    if (textNode) textNode.textContent = '\n            ' + s.multiSelect + '\n          ';
+  }
+  $('swap-mode-btn').textContent = swapMode ? s.swapModeOn : s.swapMode;
+
+  // 카테고리 레이블
+  document.querySelectorAll('.setting-category').forEach((el, i) => {
+    el.textContent = [s.general, s.background, s.ui][i] ?? el.textContent;
+  });
+
+  // show-label 슬라이더 레이블 (span 값 보존하면서)
+  const labelMap = {
+    'grid-offset-val': s.gridOffset,
+    'block-size-val': s.blockSize,
+    'block-radius-val': s.radius,
+    'sprite-dur-val': s.spriteDur,
+    'bounce-px-val': s.bounceHeight,
+    'bounce-dur-val': s.bounceDur,
+  };
+  document.querySelectorAll('.setting-label.show-label').forEach(el => {
+    const span = el.querySelector('span');
+    if (!span) return;
+    const spanId = span.id;
+    if (labelMap[spanId]) {
+      el.childNodes[0].textContent = labelMap[spanId] + '  ';
+    }
+  });
+} // 백그라운드 재생
 
 // 팝업 스왑 모드
 let swapMode = false;
@@ -581,6 +676,13 @@ function bindEvents() {
     if (title) title.style.visibility = uiVisible ? '' : 'hidden';
   });
 
+  // 언어 토글
+  document.getElementById('lang-toggle').addEventListener('click', () => {
+    lang = lang === 'ko' ? 'en' : 'ko';
+    document.getElementById('lang-toggle').textContent = lang === 'ko' ? '🇰🇷' : '🇺🇸';
+    applyLang();
+  });
+
   // 설정 모달
   document.getElementById('settings-btn').addEventListener('click', () => {
     document.getElementById('settings-modal').classList.add('open');
@@ -596,9 +698,8 @@ function bindEvents() {
   // 백그라운드 재생 토글
   document.getElementById('bg-play-toggle').addEventListener('click', () => {
     bgPlayEnabled = !bgPlayEnabled;
-    const btn = document.getElementById('bg-play-toggle');
-    btn.textContent = bgPlayEnabled ? '백그라운드 재생 ON' : '백그라운드 재생 OFF';
-    btn.classList.toggle('active', bgPlayEnabled);
+    document.getElementById('bg-play-toggle').classList.toggle('active', bgPlayEnabled);
+    applyLang();
   });
 
   // 다중선택 업로드
@@ -624,9 +725,8 @@ function bindEvents() {
     swapMode = !swapMode;
     swapFirstKey = null;
     document.querySelectorAll('.sprite-tile-item').forEach(el => el.classList.remove('swap-selected'));
-    const btn = document.getElementById('swap-mode-btn');
-    btn.textContent = swapMode ? '⇄ 교체모드 ON' : '⇄ 교체모드';
-    btn.classList.toggle('active', swapMode);
+    document.getElementById('swap-mode-btn').classList.toggle('active', swapMode);
+    applyLang();
   });
 
   // 그리드 세로 위치
@@ -674,7 +774,7 @@ function bindEvents() {
     // 커스텀 ON → 다크모드, OFF → 라이트모드
     const isLight = !customMode;
     document.body.classList.toggle('light', isLight);
-    document.getElementById('theme-toggle').textContent = isLight ? '화이트 모드' : '다크 모드';
+    applyLang();
   });
 
   // 배경색
@@ -698,10 +798,9 @@ function bindEvents() {
   // 바운스 효과
   document.getElementById('bounce-toggle').addEventListener('click', () => {
     bounceEnabled = !bounceEnabled;
-    const btn = document.getElementById('bounce-toggle');
-    btn.textContent = bounceEnabled ? '바운스 ON' : '바운스 OFF';
-    btn.classList.toggle('active', bounceEnabled);
+    document.getElementById('bounce-toggle').classList.toggle('active', bounceEnabled);
     document.getElementById('bounce-settings').style.display = bounceEnabled ? 'flex' : 'none';
+    applyLang();
   });
   document.getElementById('bounce-px').addEventListener('input', e => {
     const px = e.target.value;
@@ -715,11 +814,9 @@ function bindEvents() {
   });
   document.getElementById('free-drag-toggle').addEventListener('click', () => {
     freeDragMode = !freeDragMode;
-    const btn = document.getElementById('free-drag-toggle');
-    btn.textContent = freeDragMode ? '자유 드래그 ON' : '자유 드래그 OFF';
-    btn.classList.toggle('active', freeDragMode);
-    if (freeDragMode) enterFreeDrag();
-    else exitFreeDrag();
+    document.getElementById('free-drag-toggle').classList.toggle('active', freeDragMode);
+    if (freeDragMode) enterFreeDrag(); else exitFreeDrag();
+    applyLang();
   });
 
   // 위치 초기화
@@ -740,42 +837,35 @@ function bindEvents() {
     if (freeDragMode) enterFreeDrag();
   });
 
-  // 스타일 없애기
   document.getElementById('no-style-toggle').addEventListener('click', () => {
     noStyleMode = !noStyleMode;
-    const btn = document.getElementById('no-style-toggle');
-    btn.textContent = noStyleMode ? '스타일 없애기 ON' : '스타일 없애기 OFF';
-    btn.classList.toggle('active', noStyleMode);
+    document.getElementById('no-style-toggle').classList.toggle('active', noStyleMode);
     document.querySelectorAll('.block').forEach(el => el.classList.toggle('no-style', noStyleMode));
+    applyLang();
   });
 
-  // 타일 레이블 토글
   document.getElementById('tile-label-toggle').addEventListener('click', () => {
     tileLabelVisible = !tileLabelVisible;
-    const btn = document.getElementById('tile-label-toggle');
-    btn.textContent = tileLabelVisible ? '타일 레이블 ON' : '타일 레이블 OFF';
-    btn.classList.toggle('active', tileLabelVisible);
+    document.getElementById('tile-label-toggle').classList.toggle('active', tileLabelVisible);
     document.documentElement.style.setProperty('--tile-label-display', tileLabelVisible ? 'block' : 'none');
+    applyLang();
   });
 
-  // 팁 표시 토글
   let tipVisible = true;
   document.getElementById('tip-toggle').addEventListener('click', () => {
     tipVisible = !tipVisible;
-    const btn = document.getElementById('tip-toggle');
-    btn.textContent = tipVisible ? '팁 표시 ON' : '팁 표시 OFF';
-    btn.classList.toggle('active', tipVisible);
+    document.getElementById('tip-toggle').classList.toggle('active', tipVisible);
     document.getElementById('tip-display').style.display = tipVisible ? '' : 'none';
+    applyLang();
   });
 
   // 타이틀 표시 토글
   let titleVisible = true;
   document.getElementById('title-toggle').addEventListener('click', () => {
     titleVisible = !titleVisible;
-    const btn = document.getElementById('title-toggle');
-    btn.textContent = titleVisible ? '타이틀 표시 ON' : '타이틀 표시 OFF';
-    btn.classList.toggle('active', titleVisible);
-    document.getElementById('main-title').classList.toggle('hidden', !titleVisible);
+    document.getElementById('title-toggle').classList.toggle('active', titleVisible);
+    document.getElementById('main-title').style.visibility = titleVisible ? '' : 'hidden';
+    applyLang();
   });
 
   // 스프라이트 모달 닫기
