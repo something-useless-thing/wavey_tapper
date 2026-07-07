@@ -1,6 +1,6 @@
 // sprites.js - 스프라이트 이벤트 빌드 및 블록 UI
 
-import { BIT_MS, BLOCK_COLORS, TILE_FOLDERS, TILE_OFFSETS, BLOCK_FILTERS } from './constants.js';
+import { BIT_MS, BLOCK_COLORS, TILE_FOLDERS, TILE_OFFSETS, BLOCK_FILTERS, TEXT_TILE_FILES } from './constants.js';
 
 // 전역 스프라이트 이미지 저장소
 export const spriteImages = {}; // "id_tileIdx" → url, "id_default" → url
