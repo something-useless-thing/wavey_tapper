@@ -137,14 +137,11 @@ export function deactivateBlock(id) {
     img.style.filter = '';
     img.style.display = 'block';
     el.querySelector('.block-placeholder').style.display = 'none';
-  } else if (!isCustomMode) {
-    // 기본모드: 그냥 비어있게 (첫번째 타일 자동 표시 안 함)
-    img.style.display = 'none';
-    img.style.filter = '';
-    el.querySelector('.block-placeholder').style.display = 'none';
   } else {
+    // 기본모드/커스텀모드 둘 다 이미지 완전히 숨김
     img.style.display = 'none';
     img.style.filter = '';
+    img.src = '';
     if (isCustomMode) {
       el.querySelector('.block-num').textContent = id;
       el.querySelector('.block-placeholder').style.display = 'flex';

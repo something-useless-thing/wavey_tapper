@@ -20,11 +20,10 @@ const Bar_Seconds = 15 / 7;
 const Bit_Seconds = 5 / 448;
 const Bit_Milliseconds = 625 / 56;
 
-var disabled = false;
+let disabled = false;
 
-var Cube = {
+let Cube = {
     element: document.getElementById('cube'),
-    // top, bottom, right, left, front, back
     faces: [...document.getElementById('cube').children],
     
     screenSize: innerWidth,
