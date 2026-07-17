@@ -434,21 +434,42 @@ function makeTileItem(id, key, labelText, color) {
   fileInput.addEventListener('change', e => {
     const file = e.target.files[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    spriteImages[key] = url;
-    img.src = url; img.style.display = 'block';
-    numEl.textContent = '';
-    item.style.borderColor = color;
-    item.style.borderStyle = 'solid';
-    // 블록에 즉시 반영
-    const blockEl = document.querySelector(`.block[data-id="${id}"]`);
-    if (blockEl && key === `${id}_default` && !blockEl.classList.contains('active')) {
-      const bImg = blockEl.querySelector('.block-sprite');
-      bImg.src = url; bImg.style.display = 'block';
-      blockEl.querySelector('.block-placeholder').style.display = 'none';
-    }
+    applyImageToTile(file, key, img, numEl, item, color, id);
   });
+
+  // 드래그 앤 드롭
+  item.addEventListener('dragover', e => {
+    e.preventDefault();
+    item.classList.add('drag-hover');
+  });
+  item.addEventListener('dragleave', () => {
+    item.classList.remove('drag-hover');
+  });
+  item.addEventListener('drop', e => {
+    e.preventDefault();
+    item.classList.remove('drag-hover');
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    applyImageToTile(file, key, img, numEl, item, color, id);
+  });
+
   return item;
+}
+
+function applyImageToTile(file, key, img, numEl, item, color, id) {
+  const url = URL.createObjectURL(file);
+  spriteImages[key] = url;
+  img.src = url; img.style.display = 'block';
+  numEl.textContent = '';
+  item.style.borderColor = color;
+  item.style.borderStyle = 'solid';
+  // 블록에 즉시 반영
+  const blockEl = document.querySelector(`.block[data-id="${id}"]`);
+  if (blockEl && key === `${id}_default` && !blockEl.classList.contains('active')) {
+    const bImg = blockEl.querySelector('.block-sprite');
+    bImg.src = url; bImg.style.display = 'block';
+    blockEl.querySelector('.block-placeholder').style.display = 'none';
+  }
 }
 
 function openSpriteModal(id) {

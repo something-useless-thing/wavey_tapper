@@ -402,3 +402,10 @@ body.light .setting-category { color: #8951fb; border-color: #dddde8; }
   transition: transform 0.15s;
 }
 #lang-toggle:hover { transform: scale(1.15); }
+
+/* 타일 드래그 호버 */
+.sprite-tile-item.drag-hover {
+  border-color: #8951fb !important;
+  border-style: solid !important;
+  background: #1a1a2e;
+}
