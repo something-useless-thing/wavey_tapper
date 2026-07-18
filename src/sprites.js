@@ -142,6 +142,7 @@ export function deactivateBlock(id) {
     img.style.display = 'none';
     img.style.filter = '';
     img.src = '';
+    img.onerror = () => { img.style.display = 'none'; };
     if (isCustomMode) {
       el.querySelector('.block-num').textContent = id;
       el.querySelector('.block-placeholder').style.display = 'flex';

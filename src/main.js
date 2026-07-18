@@ -685,6 +685,7 @@ function loop() {
     const dur = (ev.endMs - ev.timeMs) * spriteDurationMult;
     const remaining = dur - (elapsedMs - ev.timeMs);
     const t = setTimeout(() => {
+      if (!isPlaying && !isPaused) return; // 정지 상태면 무시
       activeBlockTimers[ev.id] = null;
       activeBlocks[ev.id] = null;
       deactivateBlock(ev.id);
